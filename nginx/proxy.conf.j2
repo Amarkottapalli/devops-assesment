@@ -1,0 +1,46 @@
+upstream app_pool {
+    server {{ vm2_ip }}:80 max_fails=2 fail_timeout=5s;
+    server {{ vm3_ip }}:80 max_fails=2 fail_timeout=5s;
+}
+
+server {
+    listen 80 default_server;
+    server_name public.vm1.local;
+    server_tokens off;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+    server_name public.vm1.local;
+    server_tokens off;
+
+    ssl_certificate     /etc/nginx/ssl/public.vm1.local.crt;
+    ssl_certificate_key /etc/nginx/ssl/public.vm1.local.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    location = / {
+        default_type text/html;
+        return 200 "<!doctype html><title>$hostname</title><h1>Served by $hostname</h1><p>Server time: $time_iso8601</p>";
+    }
+
+    location /vm2 {
+        proxy_pass http://{{ vm2_ip }}/;
+        include /etc/nginx/proxy_params;
+        proxy_connect_timeout 2s;
+    }
+
+    location /vm3 {
+        proxy_pass http://{{ vm3_ip }}/;
+        include /etc/nginx/proxy_params;
+        proxy_connect_timeout 2s;
+    }
+
+    location /app {
+        proxy_pass http://app_pool/;
+        include /etc/nginx/proxy_params;
+        proxy_connect_timeout 1s;
+        proxy_next_upstream error timeout http_502 http_503 http_504;
+        proxy_next_upstream_tries 2;
+    }
+}

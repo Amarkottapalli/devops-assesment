@@ -1,0 +1,66 @@
+- name: Install nginx and openssl
+  ansible.builtin.apt:
+    name: [nginx, openssl]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Remove the default site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Create the certificate directory on vm1
+  ansible.builtin.file:
+    path: /etc/nginx/ssl
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  when: "'proxy' in group_names"
+
+- name: Generate the self-signed certificate on vm1
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -x509 -nodes -newkey rsa:2048 -days 365
+      -keyout /etc/nginx/ssl/public.vm1.local.key
+      -out /etc/nginx/ssl/public.vm1.local.crt
+      -subj /CN=public.vm1.local
+      -addext subjectAltName=DNS:public.vm1.local
+    creates: /etc/nginx/ssl/public.vm1.local.crt
+  when: "'proxy' in group_names"
+  notify: Reload nginx
+
+- name: Install the proxy config on vm1
+  ansible.builtin.template:
+    src: "{{ nginx_conf_dir }}/proxy.conf.j2"
+    dest: /etc/nginx/conf.d/site.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: "'proxy' in group_names"
+  notify: Reload nginx
+
+- name: Install the web page config on vm2 and vm3
+  ansible.builtin.template:
+    src: "{{ nginx_conf_dir }}/backend.conf.j2"
+    dest: /etc/nginx/conf.d/site.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: "'backends' in group_names"
+  notify: Reload nginx
+
+- name: Start nginx if it is not running
+  ansible.builtin.shell: |
+    set -e
+    if [ -s /run/nginx.pid ] && kill -0 "$(cat /run/nginx.pid)" 2>/dev/null; then
+      echo already-running
+    else
+      /usr/sbin/nginx -t
+      /usr/sbin/nginx >/dev/null 2>&1
+      echo started
+    fi
+  register: nginx_state
+  changed_when: "'started' in nginx_state.stdout"

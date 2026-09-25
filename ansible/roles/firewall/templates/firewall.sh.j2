@@ -1,0 +1,18 @@
+#!/bin/bash
+IPT=iptables
+$IPT -S INPUT >/dev/null 2>&1 || IPT=iptables-legacy
+if [ "$1" = "status" ]; then
+  $IPT -S INPUT
+  exit 0
+fi
+$IPT -F INPUT
+$IPT -A INPUT -i lo -j ACCEPT
+$IPT -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+$IPT -A INPUT -p icmp -s {{ docker_subnet }} -j ACCEPT
+{% for port in firewall_public_tcp_ports %}
+$IPT -A INPUT -p tcp --dport {{ port }} -j ACCEPT
+{% endfor %}
+{% for port in firewall_internal_tcp_ports %}
+$IPT -A INPUT -p tcp --dport {{ port }} -s {{ docker_subnet }} -j ACCEPT
+{% endfor %}
+$IPT -P INPUT DROP

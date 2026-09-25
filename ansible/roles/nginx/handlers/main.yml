@@ -1,0 +1,4 @@
+- name: Reload nginx
+  ansible.builtin.shell: |
+    /usr/sbin/nginx -t
+    if [ -s /run/nginx.pid ] && kill -0 "$(cat /run/nginx.pid)" 2>/dev/null; then /usr/sbin/nginx -s reload; fi

@@ -1,0 +1,6 @@
+ansible_user_password: "{{ vault_ansible_user_password }}"
+ssh_public_key_file: "~/.ssh/devops_assessment.pub"
+docker_subnet: "172.20.0.0/24"
+vm2_ip: "172.20.0.12"
+vm3_ip: "172.20.0.13"
+nginx_conf_dir: "{{ playbook_dir }}/../nginx"

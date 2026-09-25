@@ -1,0 +1,78 @@
+
+PLAY [Base setup for all VMs] **************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm3]
+ok: [vm1]
+ok: [vm2]
+
+TASK [common : Install base packages] ******************************************
+ok: [vm3]
+ok: [vm1]
+ok: [vm2]
+
+TASK [common : Create ansible_user] ********************************************
+ok: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+TASK [common : Give ansible_user sudo through a dedicated sudoers.d file] ******
+ok: [vm2]
+ok: [vm3]
+ok: [vm1]
+
+TASK [common : Authorize the SSH key for ansible_user] *************************
+ok: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+TASK [ssh : Apply SSH hardening settings] **************************************
+ok: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+TASK [firewall : Install the firewall script] **********************************
+ok: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+TASK [nginx : Install nginx and openssl] ***************************************
+ok: [vm3]
+ok: [vm2]
+ok: [vm1]
+
+TASK [nginx : Remove the default site] *****************************************
+ok: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+TASK [nginx : Create the certificate directory on vm1] *************************
+skipping: [vm2]
+skipping: [vm3]
+ok: [vm1]
+
+TASK [nginx : Generate the self-signed certificate on vm1] *********************
+skipping: [vm2]
+skipping: [vm3]
+ok: [vm1]
+
+TASK [nginx : Install the proxy config on vm1] *********************************
+skipping: [vm2]
+skipping: [vm3]
+ok: [vm1]
+
+TASK [nginx : Install the web page config on vm2 and vm3] **********************
+skipping: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+TASK [nginx : Start nginx if it is not running] ********************************
+ok: [vm1]
+ok: [vm2]
+ok: [vm3]
+
+PLAY RECAP *********************************************************************
+vm1                        : ok=13   changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+vm2                        : ok=11   changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
+vm3                        : ok=11   changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
+

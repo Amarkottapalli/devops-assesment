@@ -1,0 +1,2 @@
+- name: Apply firewall
+  ansible.builtin.command: /usr/local/bin/firewall.sh

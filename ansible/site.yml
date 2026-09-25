@@ -1,0 +1,8 @@
+- name: Base setup for all VMs
+  hosts: all
+  become: true
+  roles:
+    - common
+    - ssh
+    - firewall
+    - nginx

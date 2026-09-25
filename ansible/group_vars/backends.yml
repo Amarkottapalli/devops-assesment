@@ -1,0 +1,1 @@
+firewall_internal_tcp_ports: [22, 80]

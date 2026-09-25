@@ -1,0 +1,35 @@
+x-vm: &vm
+  image: vm-base
+  build: .
+  restart: always
+
+  cap_add: [NET_ADMIN]
+  volumes:
+    - ${HOME}/.ssh/devops_assessment.pub:/tmp/pubkey:ro
+
+services:
+  vm1:
+    <<: *vm
+    container_name: vm1
+    hostname: vm1
+    ports: ["127.0.0.1:2221:22", "127.0.0.1:80:80", "127.0.0.1:443:443"]
+    networks: { labnet: { ipv4_address: 172.20.0.11 } }
+  vm2:
+    <<: *vm
+    container_name: vm2
+    hostname: vm2
+    ports: ["127.0.0.1:2222:22"]
+    networks: { labnet: { ipv4_address: 172.20.0.12 } }
+  vm3:
+    <<: *vm
+    container_name: vm3
+    hostname: vm3
+    ports: ["127.0.0.1:2223:22"]
+    networks: { labnet: { ipv4_address: 172.20.0.13 } }
+
+networks:
+  labnet:
+    name: labnet
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

@@ -1,0 +1,8 @@
+- name: Install the firewall script
+  ansible.builtin.template:
+    src: firewall.sh.j2
+    dest: /usr/local/bin/firewall.sh
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Apply firewall

@@ -1,0 +1,17 @@
+- name: Apply SSH hardening settings
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-hardening.conf
+    content: |
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin no
+      PubkeyAuthentication yes
+      AllowUsers devops ansible_user
+      LoginGraceTime 30
+      X11Forwarding no
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload sshd
